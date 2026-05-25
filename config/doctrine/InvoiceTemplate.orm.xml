@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="ClearisSylius\InvoicingPlugin\Entity\InvoiceTemplate"
+            table="clearis_invoicing_template"
+            repository-class="ClearisSylius\InvoicingPlugin\Doctrine\ORM\InvoiceTemplateRepository">
+
+        <unique-constraints>
+            <unique-constraint name="uq_template_code" columns="code" />
+        </unique-constraints>
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO" />
+        </id>
+
+        <field name="code" type="string" length="64" column="code" />
+        <field name="name" type="string" length="255" column="name" nullable="true" />
+        <field name="twigTemplate" type="string" length="255" column="twig_template" />
+        <field name="logoPath" type="string" length="255" column="logo_path" nullable="true" />
+        <field name="type" type="string" length="32" column="type" />
+
+        <!-- Branding -->
+        <field name="accentColor" type="string" length="16" column="accent_color" />
+        <field name="layoutDensity" type="string" length="16" column="layout_density" />
+        <field name="showLogo" type="boolean" column="show_logo" />
+
+        <!-- Cabecera -->
+        <field name="headerText" type="text" column="header_text" nullable="true" />
+        <field name="headerContactInfo" type="text" column="header_contact_info" nullable="true" />
+
+        <!-- Cliente -->
+        <field name="showCustomerEmail" type="boolean" column="show_customer_email" />
+        <field name="showCustomerShippingAddress" type="boolean" column="show_customer_shipping_address" />
+
+        <!-- Líneas -->
+        <field name="showLineSku" type="boolean" column="show_line_sku" />
+        <field name="showLineExtendedDescription" type="boolean" column="show_line_extended_description" />
+        <field name="showLineDiscounts" type="boolean" column="show_line_discounts" />
+
+        <!-- Totales / IVA -->
+        <field name="showTaxBreakdown" type="boolean" column="show_tax_breakdown" />
+
+        <!-- Referencias del pedido -->
+        <field name="showOrderNumber" type="boolean" column="show_order_number" />
+        <field name="showPaymentMethod" type="boolean" column="show_payment_method" />
+        <field name="showShippingMethod" type="boolean" column="show_shipping_method" />
+
+        <!-- Bloques de texto libres -->
+        <field name="paymentTermsText" type="text" column="payment_terms_text" nullable="true" />
+        <field name="legalNotesText" type="text" column="legal_notes_text" nullable="true" />
+        <field name="footerText" type="text" column="footer_text" nullable="true" />
+
+        <many-to-one field="channel" target-entity="Sylius\Component\Channel\Model\ChannelInterface">
+            <join-column name="channel_id" referenced-column-name="id" nullable="true" on-delete="SET NULL" />
+        </many-to-one>
+
+    </entity>
+
+</doctrine-mapping>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="ClearisSylius\InvoicingPlugin\Entity\Invoice"
+            table="clearis_invoicing_invoice"
+            repository-class="ClearisSylius\InvoicingPlugin\Doctrine\ORM\InvoiceRepository">
+
+        <indexes>
+            <index name="idx_invoice_number" columns="number" />
+            <index name="idx_invoice_issued_at" columns="issued_at" />
+            <index name="idx_invoice_legacy_id" columns="legacy_id" />
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint name="uq_invoice_legacy_id" columns="legacy_id" />
+        </unique-constraints>
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO" />
+        </id>
+
+        <field name="type" type="string" length="32" column="type" />
+        <field name="state" type="string" length="32" column="state" />
+
+        <field name="number" type="string" length="32" column="number" />
+
+        <field name="issuedAt" type="datetime_immutable" column="issued_at" />
+
+        <field name="currencyCode" type="string" length="3" column="currency_code" />
+        <field name="localeCode" type="string" length="12" column="locale_code" />
+
+        <field name="subtotal" type="integer" column="subtotal" />
+        <field name="taxesTotal" type="integer" column="taxes_total" />
+        <field name="total" type="integer" column="total" />
+
+        <field name="paymentState" type="string" length="32" column="payment_state" />
+
+        <field name="rectificationReason" type="string" length="8" column="rectification_reason" nullable="true" />
+        <field name="pdfPath" type="string" length="255" column="pdf_path" nullable="true" />
+        <field name="legacyId" type="string" length="36" column="legacy_id" nullable="true" />
+
+        <many-to-one field="series" target-entity="ClearisSylius\InvoicingPlugin\Entity\InvoiceSeries">
+            <join-column name="series_id" referenced-column-name="id" nullable="true" on-delete="SET NULL" />
+        </many-to-one>
+
+        <many-to-one field="order" target-entity="Sylius\Component\Core\Model\OrderInterface">
+            <join-column name="order_id" referenced-column-name="id" nullable="false" on-delete="RESTRICT" />
+        </many-to-one>
+
+        <many-to-one field="channel" target-entity="Sylius\Component\Channel\Model\ChannelInterface">
+            <join-column name="channel_id" referenced-column-name="id" nullable="false" on-delete="RESTRICT" />
+        </many-to-one>
+
+        <!--
+            IMPORTANTE: en el driver XML de Doctrine la opción `cascade` NO se
+            declara como atributo (eso lo ignora silenciosamente) sino como
+            elemento hijo `<cascade><cascade-persist/></cascade>`. Sin eso, al
+            hacer flush de un Invoice nuevo con BillingData/ShopBillingData/
+            LineItems/TaxItems también nuevos, Doctrine lanza
+            `ORMInvalidArgumentException: Multiple non-persisted new entities
+            were found through the given association graph`.
+        -->
+
+        <one-to-one field="billingData" target-entity="ClearisSylius\InvoicingPlugin\Entity\BillingData" orphan-removal="true">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+            <join-column name="billing_data_id" referenced-column-name="id" nullable="false" />
+        </one-to-one>
+
+        <one-to-one field="shopBillingData" target-entity="ClearisSylius\InvoicingPlugin\Entity\ShopBillingData" orphan-removal="true">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+            <join-column name="shop_billing_data_id" referenced-column-name="id" nullable="false" />
+        </one-to-one>
+
+        <many-to-one field="rectifiedInvoice" target-entity="ClearisSylius\InvoicingPlugin\Entity\Invoice">
+            <join-column name="rectified_invoice_id" referenced-column-name="id" nullable="true" on-delete="SET NULL" />
+        </many-to-one>
+
+        <one-to-many field="lineItems" target-entity="ClearisSylius\InvoicingPlugin\Entity\InvoiceLineItem" mapped-by="invoice" orphan-removal="true">
+            <cascade>
+                <cascade-all/>
+            </cascade>
+        </one-to-many>
+
+        <one-to-many field="taxItems" target-entity="ClearisSylius\InvoicingPlugin\Entity\InvoiceTaxItem" mapped-by="invoice" orphan-removal="true">
+            <cascade>
+                <cascade-all/>
+            </cascade>
+        </one-to-many>
+
+    </entity>
+
+</doctrine-mapping>

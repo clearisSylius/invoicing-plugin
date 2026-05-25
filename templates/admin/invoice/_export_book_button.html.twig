@@ -1,0 +1,10 @@
+{# Title-bar action: open the libro registro export form. #}
+{#
+    Sylius 2 admin renders with Tabler/Bootstrap 5, so we use `btn` classes
+    (NOT the Semantic UI `ui ... button` classes that the plugin originally
+    shipped — they would render as plain unstyled <a> tags).
+#}
+<a class="btn btn-success me-2" href="{{ path('clearis_invoicing_admin_invoice_export_book') }}">
+    <i class="ti ti-download me-1"></i>
+    {{ 'clearis.ui.invoice.export_book'|trans }}
+</a>

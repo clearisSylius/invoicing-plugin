@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="ClearisSylius\InvoicingPlugin\Entity\ChannelInvoicingSettings"
+            table="clearis_invoicing_channel_settings"
+            repository-class="ClearisSylius\InvoicingPlugin\Doctrine\ORM\ChannelInvoicingSettingsRepository">
+
+        <unique-constraints>
+            <unique-constraint name="uq_channel_settings_channel" columns="channel_id" />
+        </unique-constraints>
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO" />
+        </id>
+
+        <field name="trigger" type="string" length="64" column="trigger_mode" />
+        <field name="sendEmailOnIssue" type="boolean" column="send_email_on_issue" />
+        <field name="senderEmail" type="string" length="255" column="sender_email" nullable="true" />
+        <field name="senderName" type="string" length="255" column="sender_name" nullable="true" />
+
+        <one-to-one field="channel" target-entity="Sylius\Component\Channel\Model\ChannelInterface">
+            <join-column name="channel_id" referenced-column-name="id" nullable="false" />
+        </one-to-one>
+
+        <many-to-one field="standardTemplate" target-entity="ClearisSylius\InvoicingPlugin\Entity\InvoiceTemplate">
+            <join-column name="standard_template_id" referenced-column-name="id" nullable="true" on-delete="SET NULL" />
+        </many-to-one>
+
+        <many-to-one field="rectifyingTemplate" target-entity="ClearisSylius\InvoicingPlugin\Entity\InvoiceTemplate">
+            <join-column name="rectifying_template_id" referenced-column-name="id" nullable="true" on-delete="SET NULL" />
+        </many-to-one>
+
+        <many-to-one field="standardSeries" target-entity="ClearisSylius\InvoicingPlugin\Entity\InvoiceSeries">
+            <join-column name="standard_series_id" referenced-column-name="id" nullable="true" on-delete="SET NULL" />
+        </many-to-one>
+
+        <many-to-one field="rectifyingSeries" target-entity="ClearisSylius\InvoicingPlugin\Entity\InvoiceSeries">
+            <join-column name="rectifying_series_id" referenced-column-name="id" nullable="true" on-delete="SET NULL" />
+        </many-to-one>
+
+        <many-to-one field="shopBillingData" target-entity="ClearisSylius\InvoicingPlugin\Entity\ShopBillingData">
+            <cascade>
+                <cascade-persist/>
+            </cascade>
+            <join-column name="shop_billing_data_id" referenced-column-name="id" nullable="true" on-delete="SET NULL" />
+        </many-to-one>
+
+    </entity>
+
+</doctrine-mapping>

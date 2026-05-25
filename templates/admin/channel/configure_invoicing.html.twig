@@ -1,0 +1,39 @@
+{% extends '@ClearisSyliusInvoicingPlugin/admin/_layout/page.html.twig' %}
+
+{% form_theme form 'bootstrap_5_layout.html.twig' %}
+
+{% set title = ('clearis.ui.channel.configure_invoicing_title'|trans) ~ ' — ' ~ channel.name %}
+
+{# Sylius 2 admin no tiene página show de canal, solo update/index. Vuelta
+   al listado de configuración por canal del plugin (más útil que ir al
+   listado raw de Sylius). #}
+{% block back_route %}clearis_invoicing_admin_channels_list{% endblock %}
+
+{% block page_title %}
+    <i class="ti ti-settings me-1"></i>
+    {{ 'clearis.ui.channel.configure_invoicing_title'|trans }}
+    <small class="text-muted">— {{ channel.name }} ({{ channel.code }})</small>
+{% endblock %}
+
+{% block page_body %}
+    {% if is_new %}
+        <div class="alert alert-info d-flex align-items-center" role="alert">
+            <i class="ti ti-info-circle me-2"></i>
+            <div>{{ 'clearis.ui.channel.no_settings_yet'|trans }}</div>
+        </div>
+    {% endif %}
+
+    <p class="text-muted">{{ 'clearis.ui.channel.configure_help'|trans }}</p>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="ti ti-check me-1"></i> {{ 'clearis.ui.save'|trans }}
+            </button>
+            <a href="{{ path('clearis_invoicing_admin_channels_list') }}" class="btn btn-outline-secondary">
+                {{ 'clearis.ui.cancel'|trans }}
+            </a>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}

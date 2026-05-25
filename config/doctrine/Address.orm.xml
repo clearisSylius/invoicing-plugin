@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Address resource override.
+    Sylius core defines the full Address mapping; we extend it as a mapped
+    superclass that only contributes the extra `tax_id` column on
+    `sylius_address`.
+-->
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <mapped-superclass name="ClearisSylius\InvoicingPlugin\Entity\Address">
+        <field name="taxId" column="tax_id" type="string" length="20" nullable="true" />
+    </mapped-superclass>
+
+</doctrine-mapping>

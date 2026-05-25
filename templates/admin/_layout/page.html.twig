@@ -1,0 +1,66 @@
+{#
+    Layout compartido para las páginas del admin del plugin que NO son
+    CRUD estándar de Sylius (rectify, export_book, configure_invoicing).
+
+    Sylius 2 admin usa Tabler/Bootstrap 5 con composición vía Twig Hooks
+    para sus páginas CRUD. Para nuestras páginas custom incluimos
+    directamente los partials compartidos (sidebar + navbar + flashes)
+    para heredar exactamente el mismo chrome que el resto del admin:
+
+      - `@SyliusAdmin/shared/crud/common/sidebar.html.twig`
+      - `@SyliusAdmin/shared/crud/common/navbar.html.twig`
+      - `@SyliusAdmin/shared/crud/common/content/flashes.html.twig`
+
+    El cuerpo de cada página se compone con bloques sobrescribibles
+    `page_title` y `page_body`. El botón "Volver" enlaza al índice de
+    facturas por defecto y se puede redirigir vía `back_route`.
+
+    Cada página concreta debe:
+      - heredar este template
+      - definir `{% set title = ... %}` para el <title>
+      - sobrescribir `{% block page_title %}` con el h2
+      - sobrescribir `{% block page_body %}` con el contenido
+      - opcional: sobrescribir `{% block back_route %}` para apuntar a otra ruta
+
+    Nota: `title_from_context` se expone para la plantilla de title
+    compartida de Sylius 2 (ver issue #17733 en Sylius/Sylius); el chrome
+    canónico la usa para pintar el <h1>.
+#}
+
+{% extends '@SyliusAdmin/shared/layout/base.html.twig' %}
+
+{% set title_from_context = title|default(null) %}
+
+{% block body %}
+    {% include '@SyliusAdmin/shared/crud/common/sidebar.html.twig' ignore missing %}
+
+    <div class="page-wrapper">
+        {% include '@SyliusAdmin/shared/crud/common/navbar.html.twig' ignore missing %}
+
+        <div class="page-body">
+            <div class="container-xl py-4">
+                {% include '@SyliusAdmin/shared/crud/common/content/flashes.html.twig' ignore missing %}
+
+                <div class="mb-3">
+                    <a href="{{ path(block('back_route')) }}" class="btn btn-outline-secondary">
+                        <i class="ti ti-arrow-left me-1"></i>
+                        {{ 'clearis.ui.back_to_invoices'|trans }}
+                    </a>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title mb-0">
+                            {% block page_title %}{% endblock %}
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        {% block page_body %}{% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block back_route %}clearis_invoicing_admin_invoice_index{% endblock %}

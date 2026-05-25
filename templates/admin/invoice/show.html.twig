@@ -1,0 +1,132 @@
+{#
+    Cuerpo de la página de detalle de factura.
+    Se inyecta como child del hook `sylius_admin.invoice.show.content` desde
+    `config/twig_hooks/admin.php`. El chrome (sidebar, navbar, header con
+    breadcrumb y title_block) lo aporta `@SyliusAdmin/shared/crud/show.html.twig`,
+    la plantilla canónica de Sylius declarada en la ruta
+    `clearis_invoicing_admin_invoice_show`.
+
+    Twig hooks NO heredan variables del template padre; hay que sacarlas del
+    contexto del hookable (`hookable_metadata.context`). En el CRUD show de
+    Sylius 2, ese contexto contiene `resource` (el Invoice) y
+    `resource_metadata`.
+#}
+
+{% set invoice = hookable_metadata.context.resource
+    ?? sylius_template_event_context.resource
+    ?? resource
+    ?? null %}
+
+{% if invoice is null %}
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="ti ti-alert-circle me-2"></i>
+        <div>No se pudo cargar la factura: variable `resource` no disponible en el contexto del hook.</div>
+    </div>
+{% else %}
+
+<div class="container-xl py-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h2 class="card-title mb-1">
+                    {% if invoice.type == 'rectifying' %}
+                        <i class="ti ti-arrow-back-up me-1"></i>
+                    {% else %}
+                        <i class="ti ti-receipt me-1"></i>
+                    {% endif %}
+                    {{ invoice.number }}
+                </h2>
+                <div class="text-muted">
+                    {{ invoice.issuedAt|date('d/m/Y H:i') }} · {{ invoice.channel.code }} · {{ ('clearis.invoice.state.' ~ invoice.state)|trans }}
+                </div>
+            </div>
+
+            <div class="btn-list">
+                <a class="btn btn-primary"
+                   href="{{ path('clearis_invoicing_admin_invoice_download_pdf', {id: invoice.id}) }}"
+                   target="_blank"
+                   rel="noopener">
+                    <i class="ti ti-download me-1"></i> {{ 'clearis.ui.invoice.show.download_pdf'|trans }}
+                </a>
+                {% if invoice.state != 'cancelled' %}
+                <a class="btn btn-warning"
+                   href="{{ path('clearis_invoicing_admin_invoice_rectify', {id: invoice.id}) }}">
+                    <i class="ti ti-arrow-back-up me-1"></i> {{ 'clearis.ui.invoice.show.rectify'|trans }}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card-body">
+            <h3 class="h4 mb-2">{{ 'clearis.ui.invoice.show.customer'|trans }}</h3>
+            <p>
+                <strong>{{ invoice.billingData.fullName }}</strong><br />
+                {% if invoice.billingData.taxId %}{{ 'clearis.ui.invoice.show.tax_id'|trans }}: {{ invoice.billingData.taxId }}<br />{% endif %}
+                {{ invoice.billingData.street }}, {{ invoice.billingData.postcode }} {{ invoice.billingData.city }}
+                {%- if invoice.billingData.provinceName %}, {{ invoice.billingData.provinceName }}{% endif %}
+                ({{ invoice.billingData.countryCode }})
+            </p>
+
+            {% if invoice.type == 'rectifying' %}
+                <div class="alert alert-warning d-flex align-items-start">
+                    <i class="ti ti-alert-triangle me-2 mt-1"></i>
+                    <div>
+                        <strong>{{ 'clearis.ui.invoice.show.rectification'|trans }}</strong><br />
+                        {{ 'clearis.ui.invoice.show.rectification_reason'|trans }}: <strong>{{ invoice.rectificationReason }}</strong><br />
+                        {% if invoice.rectifiedInvoice %}
+                            {{ 'clearis.ui.invoice.show.rectifies'|trans }}:
+                            <a href="{{ path('clearis_invoicing_admin_invoice_show', {id: invoice.rectifiedInvoice.id}) }}">
+                                {{ invoice.rectifiedInvoice.number }}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="table-responsive mt-3">
+                <table class="table table-striped table-bordered table-vcenter">
+                    <thead>
+                        <tr>
+                            <th>{{ 'clearis.ui.invoice.show.item'|trans }}</th>
+                            <th class="text-end">{{ 'clearis.ui.invoice.show.quantity'|trans }}</th>
+                            <th class="text-end">{{ 'clearis.ui.invoice.show.unit_price'|trans }}</th>
+                            <th class="text-end">{{ 'clearis.ui.invoice.show.tax_rate'|trans }}</th>
+                            <th class="text-end">{{ 'clearis.ui.invoice.show.total'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for line in invoice.lineItems %}
+                            <tr>
+                                <td>
+                                    {{ line.name }}
+                                    {% if line.variantName %}<br /><small class="text-muted">{{ line.variantName }}</small>{% endif %}
+                                </td>
+                                <td class="text-end">{{ line.quantity }}</td>
+                                <td class="text-end">{{ (line.discountedUnitNetPrice / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</td>
+                                <td class="text-end">{% if line.taxRate %}{{ line.taxRate|trim('%') }}%{% else %}—{% endif %}</td>
+                                <td class="text-end">{{ (line.total / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4" class="text-end">{{ 'clearis.ui.invoice.show.subtotal'|trans }}</th>
+                            <th class="text-end">{{ (invoice.subtotal / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</th>
+                        </tr>
+                        {% for tax in invoice.taxItems %}
+                            <tr>
+                                <th colspan="4" class="text-end">{{ tax.label }}</th>
+                                <th class="text-end">{{ (tax.amount / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</th>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <th colspan="4" class="text-end fs-3">{{ 'clearis.ui.invoice.show.total'|trans }}</th>
+                            <th class="text-end fs-3">{{ (invoice.total / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

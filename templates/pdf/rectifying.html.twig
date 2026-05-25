@@ -1,0 +1,66 @@
+{% extends '@ClearisSyliusInvoicingPlugin/pdf/default.html.twig' %}
+
+{#
+    Plantilla para facturas rectificativas. Hereda toda la maquinaria de
+    `default.html.twig` (toggles, branding, secciones) y solo sobreescribe
+    el `header` para añadir un banner naranja arriba con el motivo de
+    rectificación + la factura original.
+#}
+
+{% block style %}
+    {{ parent() }}
+    .rectifying-banner { background: #fff3e0; border: 1px solid #ffb74d; padding: 10px 12px; margin-bottom: 14px; }
+    .rectifying-banner h1 { color: #b45000; margin: 0 0 4px; }
+    .rectifying-banner .small { display: block; margin-top: 4px; }
+{% endblock %}
+
+{% block header %}
+{% if template.headerText %}
+    <div class="header-text">{{ template.headerText|nl2br }}</div>
+{% endif %}
+
+<div class="rectifying-banner">
+    <table style="width: 100%;"><tr>
+        <td style="width: 65%;">
+            <h1>{{ 'clearis.pdf.rectifying_invoice'|trans }}</h1>
+            <span class="small">
+                {{ 'clearis.pdf.rectification_reason'|trans }}:
+                <strong>{{ invoice.rectificationReason }}</strong>
+                {% if invoice.rectifiedInvoice %}
+                    — {{ 'clearis.pdf.rectifies'|trans }} {{ invoice.rectifiedInvoice.number }}
+                    ({{ invoice.rectifiedInvoice.issuedAt|date('d/m/Y') }})
+                {% endif %}
+            </span>
+        </td>
+        <td style="text-align: right;">
+            <strong>{{ invoice.number }}</strong><br />
+            {{ invoice.issuedAt|date('d/m/Y') }}
+            {% if template.showOrderNumber and invoice.order %}
+                <br /><span class="small">{{ 'clearis.pdf.order_number'|trans }}: {{ invoice.order.number }}</span>
+            {% endif %}
+        </td>
+    </tr></table>
+</div>
+
+{# Sigue con la cabecera estándar del default (emisor + logo) — pintamos
+   solo el bloque de meta sin volver a pintar headerText (ya lo pusimos
+   arriba) ni el title que ya pintó el banner. #}
+<table class="meta">
+    <tr>
+        <td class="left">
+            {% if template.showLogo and template.logoPath %}
+                <img src="{{ template.logoPath }}" alt="" style="max-height: 50px; max-width: 220px; margin-bottom: 6px;" />
+            {% endif %}
+            <h2>{{ invoice.shopBillingData.companyName }}</h2>
+            <div>
+                {{ invoice.shopBillingData.taxId }}<br />
+                {{ invoice.shopBillingData.street }}<br />
+                {{ invoice.shopBillingData.postcode }} {{ invoice.shopBillingData.city }} ({{ invoice.shopBillingData.countryCode }})
+            </div>
+            {% if template.headerContactInfo %}
+                <div class="small text-pre" style="margin-top: 4px;">{{ template.headerContactInfo }}</div>
+            {% endif %}
+        </td>
+    </tr>
+</table>
+{% endblock %}

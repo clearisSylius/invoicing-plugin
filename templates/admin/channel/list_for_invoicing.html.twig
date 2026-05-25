@@ -1,0 +1,93 @@
+{% extends '@ClearisSyliusInvoicingPlugin/admin/_layout/page.html.twig' %}
+
+{% set title = 'clearis.ui.channel.list_title'|trans %}
+
+{# Override del botón Volver: aquí vamos al índice de facturas, no a otra
+   página de canales (que no existe en Sylius 2 admin). #}
+{% block back_route %}clearis_invoicing_admin_invoice_index{% endblock %}
+
+{% block page_title %}
+    <i class="ti ti-settings me-1"></i>
+    {{ 'clearis.ui.channel.list_title'|trans }}
+{% endblock %}
+
+{% block page_body %}
+    <p class="text-muted">{{ 'clearis.ui.channel.list_help'|trans }}</p>
+
+    {% if rows is empty %}
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="ti ti-alert-circle me-2"></i>
+            <div>{{ 'clearis.ui.channel.list_no_channels'|trans }}</div>
+        </div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-vcenter table-striped">
+                <thead>
+                    <tr>
+                        <th>{{ 'clearis.ui.channel.list_col_channel'|trans }}</th>
+                        <th>{{ 'clearis.ui.channel.list_col_status'|trans }}</th>
+                        <th>{{ 'clearis.ui.channel.list_col_series'|trans }}</th>
+                        <th>{{ 'clearis.ui.channel.list_col_template'|trans }}</th>
+                        <th class="w-1"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in rows %}
+                    {% set channel = row.channel %}
+                    {% set settings = row.settings %}
+                    {% set status = row.status %}
+                    <tr>
+                        <td>
+                            <strong>{{ channel.name }}</strong>
+                            <br /><small class="text-muted">{{ channel.code }}</small>
+                        </td>
+                        <td>
+                            {% if status == 'configured' %}
+                                <span class="badge bg-green text-white">
+                                    <i class="ti ti-check me-1"></i>
+                                    {{ 'clearis.ui.channel.status_configured'|trans }}
+                                </span>
+                            {% elseif status == 'partial' %}
+                                <span class="badge bg-yellow text-white">
+                                    <i class="ti ti-alert-triangle me-1"></i>
+                                    {{ 'clearis.ui.channel.status_partial'|trans }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-red text-white">
+                                    <i class="ti ti-x me-1"></i>
+                                    {{ 'clearis.ui.channel.status_unconfigured'|trans }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if settings and settings.standardSeries %}
+                                {{ settings.standardSeries.code }}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if settings and settings.standardTemplate %}
+                                {{ settings.standardTemplate.code }}
+                            {% else %}
+                                <span class="text-muted">{{ 'clearis.ui.channel.default_template'|trans }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('clearis_invoicing_admin_configure_channel', {channelId: channel.id}) }}"
+                               class="btn btn-sm {{ status == 'unconfigured' ? 'btn-primary' : 'btn-outline-primary' }}">
+                                <i class="ti ti-settings me-1"></i>
+                                {% if status == 'unconfigured' %}
+                                    {{ 'clearis.ui.channel.create_invoicing_settings'|trans }}
+                                {% else %}
+                                    {{ 'clearis.ui.channel.edit_invoicing_settings'|trans }}
+                                {% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

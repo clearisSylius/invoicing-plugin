@@ -1,0 +1,145 @@
+# Admin routes: must be imported under the admin firewall in the host app
+# with the standard `/%sylius_admin.path_name%` prefix.
+#
+# IMPORTANTE — convención de nombres en Sylius 2:
+# Los hookables del admin generan URLs de breadcrumb a partir del alias del
+# recurso siguiendo el patrón
+#   `<applicationName>_admin_<singularName>_<action>`
+# Para nuestro alias `clearis_invoicing.invoice`:
+#   applicationName  → "clearis_invoicing" (parte antes del punto)
+#   singularName     → "invoice"
+#   esperado         → `clearis_invoicing_admin_invoice_index`
+#
+# Por eso TODAS las rutas custom del plugin usan el prefijo
+# `clearis_invoicing_admin_*` (no `clearis_admin_*`), aunque sean acciones
+# custom y no CRUD estándar — así los hooks que componen URLs por
+# convención (breadcrumbs, "cancel" buttons, etc.) las encuentran.
+
+# --- Invoice resource (read-only CRUD: index + show only).
+clearis_invoicing_admin_invoice_index:
+    path: /%clearis_sylius_invoicing.admin.invoice_path%/
+    methods: [GET]
+    defaults:
+        _controller: clearis_invoicing.controller.invoice::indexAction
+        _sylius:
+            section: admin
+            template: '@SyliusAdmin/shared/crud/index.html.twig'
+            grid: clearis_invoicing_invoice
+            permission: true
+        _resource: clearis_invoicing.invoice
+
+clearis_invoicing_admin_invoice_show:
+    path: /%clearis_sylius_invoicing.admin.invoice_path%/{id}
+    methods: [GET]
+    requirements:
+        id: '\d+'
+    defaults:
+        _controller: clearis_invoicing.controller.invoice::showAction
+        _sylius:
+            section: admin
+            # Usamos la plantilla canónica de Sylius 2: nos pinta el chrome
+            # completo (sidebar, navbar, header con breadcrumbs y title_block)
+            # y nuestro contenido se inyecta como hook child de
+            # `sylius_admin.invoice.show.content` (declarado en
+            # `config/twig_hooks/admin.php`).
+            #
+            # Esto era inviable mientras `sylius/invoicing-plugin` estaba
+            # instalado: el oficial registra hooks bajo ese mismo namespace
+            # (su recurso también tiene singularName "invoice") y su seller
+            # section reventaba intentando leer `invoice.company()` en nuestra
+            # entidad. Con el oficial desinstalado el namespace es nuestro.
+            template: '@SyliusAdmin/shared/crud/show.html.twig'
+            permission: true
+        _resource: clearis_invoicing.invoice
+
+# --- Bespoke endpoints: download PDF, rectify, regenerate PDF.
+clearis_invoicing_admin_invoice_download_pdf:
+    path: /%clearis_sylius_invoicing.admin.invoice_path%/{id}/download
+    methods: [GET]
+    requirements:
+        id: '\d+'
+    defaults:
+        _controller: ClearisSylius\InvoicingPlugin\Controller\Admin\DownloadInvoicePdfController
+
+clearis_invoicing_admin_invoice_rectify:
+    path: /%clearis_sylius_invoicing.admin.invoice_path%/{id}/rectify
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
+    defaults:
+        _controller: ClearisSylius\InvoicingPlugin\Controller\Admin\RectifyInvoiceController
+
+clearis_invoicing_admin_invoice_create_manual:
+    path: /orders/{orderNumber}/invoice
+    methods: [POST]
+    defaults:
+        _controller: ClearisSylius\InvoicingPlugin\Controller\Admin\CreateInvoiceManuallyController
+
+clearis_invoicing_admin_invoice_export_book:
+    path: /%clearis_sylius_invoicing.admin.invoice_path%/export-book
+    methods: [GET]
+    defaults:
+        _controller: ClearisSylius\InvoicingPlugin\Controller\Admin\ExportInvoiceBookController
+
+# Listado de canales con su estado de configuración de facturación.
+# Punto de entrada desde el menú lateral del plugin — más fiable que el
+# hook en la página de canal (Sylius 2 admin no tiene show de canales).
+clearis_invoicing_admin_channels_list:
+    path: /invoicing-channels
+    methods: [GET]
+    defaults:
+        _controller: ClearisSylius\InvoicingPlugin\Controller\Admin\ListChannelsForInvoicingController
+
+# Editor de ChannelInvoicingSettings (trigger, series por defecto, plantillas,
+# shopBillingData del emisor) por canal.
+clearis_invoicing_admin_configure_channel:
+    path: /channels/{channelId}/invoicing-settings
+    methods: [GET, POST]
+    requirements:
+        channelId: '\d+'
+    defaults:
+        _controller: ClearisSylius\InvoicingPlugin\Controller\Admin\ConfigureChannelInvoicingController
+
+# --- Series and Templates resource CRUDs (standard Sylius resource routes).
+#
+# Para los recursos `clearis_invoicing.invoice_series` y `clearis_invoicing.invoice_template`,
+# el resource route loader de Sylius genera automáticamente:
+#   - clearis_invoicing_admin_invoice_series_{index,create,update,delete}
+#   - clearis_invoicing_admin_invoice_template_{index,create,update,delete}
+# así que no hay que tocar nada — siguen la convención por construcción.
+#
+# IMPORTANTE: NO añadimos `prefix:` aquí. El resource loader de Sylius
+# 2 ya monta cada recurso bajo `/<singular-name-con-guiones>`, así que
+# las URLs limpias quedan `/admin/invoice-series/...` y
+# `/admin/invoice-templates/...`. Poner un `prefix:` adicional produce
+# doble prefijo (`/admin/invoicing-series/invoice-series/...`), que era
+# lo que pasaba antes.
+clearis_invoicing_admin_invoice_series:
+    resource: |
+        alias: clearis_invoicing.invoice_series
+        section: admin
+        templates: '@SyliusAdmin/shared/crud'
+        grid: clearis_invoicing_series
+        except: ['show']
+        redirect: index
+        vars:
+            all:
+                subheader: 'clearis.ui.series.subheader'
+            index:
+                icon: list
+    type: sylius.resource
+
+clearis_invoicing_admin_invoice_template:
+    resource: |
+        alias: clearis_invoicing.invoice_template
+        section: admin
+        templates: '@SyliusAdmin/shared/crud'
+        grid: clearis_invoicing_template
+        except: ['show']
+        redirect: index
+        vars:
+            all:
+                subheader: 'clearis.ui.template.subheader'
+            index:
+                icon: file-text
+    type: sylius.resource

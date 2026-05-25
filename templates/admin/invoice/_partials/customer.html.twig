@@ -1,0 +1,4 @@
+{% if data %}
+    {{ data.fullName }}
+    {% if data.taxId %}<br /><small class="text-muted">{{ data.taxId }}</small>{% endif %}
+{% endif %}

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults autowire="true" autoconfigure="true" public="false" />
+
+        <!-- Number generator -->
+        <service id="ClearisSylius\InvoicingPlugin\Generator\InvoiceNumberGenerator" />
+        <service id="ClearisSylius\InvoicingPlugin\Generator\InvoiceNumberGeneratorInterface"
+                 alias="ClearisSylius\InvoicingPlugin\Generator\InvoiceNumberGenerator" />
+
+        <!-- Snapshotters -->
+        <service id="ClearisSylius\InvoicingPlugin\Factory\BillingDataSnapshotter" />
+        <service id="ClearisSylius\InvoicingPlugin\Factory\ShopBillingDataSnapshotter" />
+
+        <!-- Invoice factories -->
+        <service id="ClearisSylius\InvoicingPlugin\Factory\InvoiceFactory" />
+        <service id="ClearisSylius\InvoicingPlugin\Factory\InvoiceFactoryInterface"
+                 alias="ClearisSylius\InvoicingPlugin\Factory\InvoiceFactory" />
+
+        <service id="ClearisSylius\InvoicingPlugin\Factory\RectifyingInvoiceFactory" />
+        <service id="ClearisSylius\InvoicingPlugin\Factory\RectifyingInvoiceFactoryInterface"
+                 alias="ClearisSylius\InvoicingPlugin\Factory\RectifyingInvoiceFactory" />
+
+        <!-- Trigger resolver -->
+        <service id="ClearisSylius\InvoicingPlugin\Resolver\InvoiceTriggerResolver" />
+        <service id="ClearisSylius\InvoicingPlugin\Resolver\InvoiceTriggerResolverInterface"
+                 alias="ClearisSylius\InvoicingPlugin\Resolver\InvoiceTriggerResolver" />
+
+        <!-- Legacy mode switch -->
+        <service id="ClearisSylius\InvoicingPlugin\Resolver\LegacyModeChecker">
+            <argument>%clearis_sylius_invoicing.legacy_mode%</argument>
+        </service>
+
+        <!--
+            Listeners. Each is tagged on a specific Sylius transition event.
+            Sylius emits "sylius.{resource}.post_{transition}" events through
+            the resource event dispatcher, so we hook there.
+
+            When `legacy_mode=true`, autoconfigure still registers these but
+            they no-op via a conditional decorator (see legacy_mode_listeners.xml).
+        -->
+        <service id="ClearisSylius\InvoicingPlugin\EventListener\OrderCompletedListener">
+            <tag name="kernel.event_listener" event="sylius.order.post_complete" />
+        </service>
+
+        <service id="ClearisSylius\InvoicingPlugin\EventListener\PaymentCompletedListener">
+            <tag name="kernel.event_listener" event="sylius.payment.post_complete" />
+        </service>
+
+        <service id="ClearisSylius\InvoicingPlugin\EventListener\ShipmentShippedListener">
+            <tag name="kernel.event_listener" event="sylius.shipment.post_ship" />
+        </service>
+    </services>
+
+</container>

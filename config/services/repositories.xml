@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults autowire="false" autoconfigure="false" public="false" />
+
+        <!--
+            Sylius' resource bundle registers repositories under
+            `<resource_id>.repository.<resource_alias>` IDs. We add typed
+            aliases so application code and tests can hint against the
+            interfaces (preferred) instead of the concrete service ids.
+        -->
+        <service id="ClearisSylius\InvoicingPlugin\Doctrine\ORM\InvoiceRepositoryInterface"
+                 alias="clearis_invoicing.repository.invoice" public="true" />
+
+        <service id="ClearisSylius\InvoicingPlugin\Doctrine\ORM\InvoiceSeriesRepositoryInterface"
+                 alias="clearis_invoicing.repository.invoice_series" public="true" />
+
+        <service id="ClearisSylius\InvoicingPlugin\Doctrine\ORM\InvoiceTemplateRepository"
+                 alias="clearis_invoicing.repository.invoice_template" public="true" />
+
+        <service id="ClearisSylius\InvoicingPlugin\Doctrine\ORM\ChannelInvoicingSettingsRepository"
+                 alias="clearis_invoicing.repository.channel_invoicing_settings" public="true" />
+    </services>
+
+</container>

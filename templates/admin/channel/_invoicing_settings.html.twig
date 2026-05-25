@@ -1,0 +1,51 @@
+{% set channel = sylius_template_event_context.channel ?? hookable_metadata.context.channel ?? channel ?? null %}
+{% if channel is not null %}
+    {% set settings = sylius_get_clearis_channel_settings(channel) %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title mb-0">
+                <i class="ti ti-receipt me-1"></i>
+                {{ 'clearis.ui.channel.invoicing_settings'|trans }}
+            </h3>
+        </div>
+        <div class="card-body">
+            {% if settings %}
+                <p>
+                    <strong>{{ 'clearis.ui.channel.trigger'|trans }}:</strong>
+                    {{ ('clearis.invoice.trigger.' ~ settings.trigger)|trans }}
+                </p>
+                <p>
+                    <strong>{{ 'clearis.ui.channel.standard_series'|trans }}:</strong>
+                    {{ settings.standardSeries ? settings.standardSeries.code : '—' }}
+                    <br />
+                    <strong>{{ 'clearis.ui.channel.rectifying_series'|trans }}:</strong>
+                    {{ settings.rectifyingSeries ? settings.rectifyingSeries.code : '—' }}
+                </p>
+                <p>
+                    <strong>{{ 'clearis.ui.channel.standard_template'|trans }}:</strong>
+                    {{ settings.standardTemplate ? settings.standardTemplate.code : 'default' }}
+                </p>
+                {% if settings.shopBillingData %}
+                    <p>
+                        <strong>{{ 'clearis.ui.channel.shop_billing'|trans }}:</strong>
+                        {{ settings.shopBillingData.companyName }} ({{ settings.shopBillingData.taxId }})
+                    </p>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <i class="ti ti-alert-triangle me-2"></i>
+                    <div>{{ 'clearis.ui.channel.no_settings'|trans }}</div>
+                </div>
+            {% endif %}
+
+            <a class="btn btn-primary" href="{{ path('clearis_invoicing_admin_configure_channel', {channelId: channel.id}) }}">
+                <i class="ti ti-settings me-1"></i>
+                {% if settings %}
+                    {{ 'clearis.ui.channel.edit_invoicing_settings'|trans }}
+                {% else %}
+                    {{ 'clearis.ui.channel.create_invoicing_settings'|trans }}
+                {% endif %}
+            </a>
+        </div>
+    </div>
+{% endif %}

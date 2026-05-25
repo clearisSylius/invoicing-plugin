@@ -1,0 +1,6 @@
+{# Grid cell helper: render the invoice state as a Bootstrap badge. #}
+{% set bg = data.state == 'cancelled' ? 'bg-red' : 'bg-green' %}
+<span class="badge {{ bg }} text-white">{{ ('clearis.invoice.state.' ~ data.state)|trans }}</span>
+{% if data.type == 'rectifying' %}
+    <br /><small class="text-muted">{{ 'clearis.invoice.type_rectifying'|trans }}</small>
+{% endif %}

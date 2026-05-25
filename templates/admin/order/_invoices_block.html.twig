@@ -1,0 +1,65 @@
+{# Twig hook child: list invoices attached to an order on the order show page. #}
+{% set order = sylius_template_event_context.order ?? hookable_metadata.context.order ?? order ?? null %}
+{% if order is not null %}
+    {% set invoices = sylius_get_clearis_invoices_for_order(order) %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title mb-0">
+                <i class="ti ti-receipt me-1"></i>
+                {{ 'clearis.ui.order.invoices'|trans }}
+            </h3>
+        </div>
+        <div class="card-body">
+            {% if invoices is empty %}
+                {% set trigger = sylius_get_clearis_channel_trigger(order.channel) %}
+                <p class="text-muted">{{ 'clearis.ui.order.no_invoices'|trans }}</p>
+                {% if trigger == 'manual' %}
+                    <form action="{{ path('clearis_invoicing_admin_invoice_create_manual', {orderNumber: order.number}) }}" method="post">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ti ti-plus me-1"></i> {{ 'clearis.ui.order.issue_invoice'|trans }}
+                        </button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-vcenter">
+                        <thead>
+                            <tr>
+                                <th>{{ 'clearis.ui.order.invoice_number'|trans }}</th>
+                                <th>{{ 'clearis.ui.order.invoice_type'|trans }}</th>
+                                <th>{{ 'clearis.ui.order.invoice_issued_at'|trans }}</th>
+                                <th class="text-end">{{ 'clearis.ui.order.invoice_total'|trans }}</th>
+                                <th class="w-1"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for invoice in invoices %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('clearis_invoicing_admin_invoice_show', {id: invoice.id}) }}">
+                                        {{ invoice.number }}
+                                    </a>
+                                </td>
+                                <td>{{ ('clearis.invoice.type_' ~ invoice.type)|trans }}</td>
+                                <td>{{ invoice.issuedAt|date('d/m/Y') }}</td>
+                                <td class="text-end">{{ (invoice.total / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</td>
+                                <td>
+                                    {# Botón compacto con texto: si el icono no carga en alguna versión
+                                       de Tabler, el "PDF" deja un click target legible. #}
+                                    <a class="btn btn-sm btn-outline-primary"
+                                       href="{{ path('clearis_invoicing_admin_invoice_download_pdf', {id: invoice.id}) }}"
+                                       target="_blank"
+                                       rel="noopener"
+                                       title="{{ 'clearis.ui.order.view_invoice'|trans }}">
+                                        <i class="ti ti-download me-1"></i>PDF
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}

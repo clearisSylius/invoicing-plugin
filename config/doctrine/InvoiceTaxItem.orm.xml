@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="ClearisSylius\InvoicingPlugin\Entity\InvoiceTaxItem"
+            table="clearis_invoicing_invoice_tax_item">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO" />
+        </id>
+
+        <field name="label" type="string" length="64" column="label" />
+        <field name="rate" type="decimal" column="rate" precision="6" scale="2" />
+        <field name="base" type="integer" column="base_amount" />
+        <field name="amount" type="integer" column="amount" />
+
+        <many-to-one field="invoice" target-entity="ClearisSylius\InvoicingPlugin\Entity\Invoice" inversed-by="taxItems">
+            <join-column name="invoice_id" referenced-column-name="id" nullable="false" on-delete="CASCADE" />
+        </many-to-one>
+
+    </entity>
+
+</doctrine-mapping>

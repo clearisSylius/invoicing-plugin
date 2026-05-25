@@ -1,0 +1,30 @@
+parameters:
+    level: max
+    reportUnmatchedIgnoredErrors: false
+    paths:
+        - src
+        - tests/Behat
+
+    excludePaths:
+        # Makes PHPStan crash
+        - 'src/DependencyInjection/Configuration.php'
+
+        # Test dependencies
+        - 'tests/TestApplication/src/**.php'
+
+    ignoreErrors:
+        - '/Parameter #1 \$configuration of method Symfony\\Component\\DependencyInjection\\Extension\\Extension::processConfiguration\(\) expects Symfony\\Component\\Config\\Definition\\ConfigurationInterface, Symfony\\Component\\Config\\Definition\\ConfigurationInterface\|null given\./'
+        -
+            identifier: missingType.iterableValue
+
+        # DBAL fetchAssociative() devuelve array<string, mixed> por diseño. En el
+        # importer y en su command sabemos qué columnas trae cada SELECT (son
+        # tablas del plugin oficial, schema conocido), así que casteamos
+        # directamente. Refactorizar cada acceso a un helper con assert
+        # añadiría ~40 líneas que no aportan seguridad real.
+        -
+            message: '#Cannot cast mixed to (string|int)\.#'
+            path: src/Migration/LegacyInvoiceImporter.php
+        -
+            message: '#Cannot cast mixed to (string|int)\.#'
+            path: src/Migration/Command/ImportFromOfficialCommand.php

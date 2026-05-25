@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults autowire="true" autoconfigure="true" public="false" />
+
+        <service id="ClearisSylius\InvoicingPlugin\Twig\InvoicingExtension">
+            <tag name="twig.extension" />
+        </service>
+
+        <!--
+            Add a "Facturación" section to the admin sidebar via the
+            `sylius.menu.admin.main` event (KnpMenu pattern still supported
+            in Sylius 2 — see docs.sylius.com customizing-menus).
+        -->
+        <service id="ClearisSylius\InvoicingPlugin\Menu\AdminMenuListener">
+            <tag name="kernel.event_listener"
+                  event="sylius.menu.admin.main"
+                  method="addAdminMenuItems" />
+        </service>
+
+        <service id="ClearisSylius\InvoicingPlugin\Controller\Admin\DownloadInvoicePdfController" public="true" />
+        <service id="ClearisSylius\InvoicingPlugin\Controller\Admin\CreateInvoiceManuallyController" public="true" />
+        <service id="ClearisSylius\InvoicingPlugin\Controller\Admin\RectifyInvoiceController" public="true" />
+        <service id="ClearisSylius\InvoicingPlugin\Controller\Admin\ExportInvoiceBookController" public="true" />
+        <service id="ClearisSylius\InvoicingPlugin\Controller\Admin\ConfigureChannelInvoicingController" public="true" />
+        <service id="ClearisSylius\InvoicingPlugin\Controller\Admin\ListChannelsForInvoicingController" public="true" />
+
+        <service id="ClearisSylius\InvoicingPlugin\Form\Type\InvoiceSeriesType">
+            <tag name="form.type" />
+        </service>
+        <service id="ClearisSylius\InvoicingPlugin\Form\Type\InvoiceTemplateType">
+            <tag name="form.type" />
+        </service>
+        <service id="ClearisSylius\InvoicingPlugin\Form\Type\ChannelInvoicingSettingsType">
+            <tag name="form.type" />
+        </service>
+        <service id="ClearisSylius\InvoicingPlugin\Form\Type\ShopBillingDataType">
+            <tag name="form.type" />
+        </service>
+        <service id="ClearisSylius\InvoicingPlugin\Form\Type\RectifyInvoiceType">
+            <tag name="form.type" />
+        </service>
+        <service id="ClearisSylius\InvoicingPlugin\Form\Type\ExportInvoiceBookRangeType">
+            <tag name="form.type" />
+        </service>
+    </services>
+
+</container>

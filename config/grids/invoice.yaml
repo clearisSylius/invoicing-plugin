@@ -1,0 +1,111 @@
+# Admin grid for the plugin's Invoice resource.
+#
+# Filters mirror the libro registro needs: date range, channel, series, type,
+# customer NIF (via billing snapshot), invoice number.
+
+sylius_grid:
+    grids:
+        clearis_invoicing_invoice:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: ClearisSylius\InvoicingPlugin\Entity\Invoice
+                    repository:
+                        method: createQueryBuilder
+                        arguments: ['o']
+            sorting:
+                issuedAt: desc
+            limits: [25, 50, 100, 250]
+            fields:
+                number:
+                    type: string
+                    label: 'clearis.grid.invoice.number'
+                    sortable: ~
+                type:
+                    type: string
+                    label: 'clearis.grid.invoice.type'
+                    sortable: ~
+                issuedAt:
+                    type: datetime
+                    label: 'clearis.grid.invoice.issued_at'
+                    sortable: ~
+                    options:
+                        format: 'd/m/Y'
+                channel:
+                    type: twig
+                    label: 'clearis.grid.invoice.channel'
+                    path: channel
+                    options:
+                        template: '@ClearisSyliusInvoicingPlugin/admin/invoice/_partials/channel.html.twig'
+                customer:
+                    type: twig
+                    label: 'clearis.grid.invoice.customer'
+                    path: billingData
+                    options:
+                        template: '@ClearisSyliusInvoicingPlugin/admin/invoice/_partials/customer.html.twig'
+                total:
+                    type: twig
+                    label: 'clearis.grid.invoice.total'
+                    path: .
+                    options:
+                        template: '@ClearisSyliusInvoicingPlugin/admin/invoice/_partials/total.html.twig'
+                state:
+                    type: twig
+                    label: 'clearis.grid.invoice.state'
+                    path: .
+                    options:
+                        template: '@ClearisSyliusInvoicingPlugin/admin/invoice/_partials/state.html.twig'
+            filters:
+                number:
+                    type: string
+                    label: 'clearis.grid.invoice.number'
+                issuedAt:
+                    type: date
+                    label: 'clearis.grid.invoice.issued_at'
+                    options:
+                        field: o.issuedAt
+                channel:
+                    type: entity
+                    label: 'clearis.grid.invoice.channel'
+                    options:
+                        fields: [channel]
+                    # En Sylius 2 las opciones que se pasan al form type (EntityType
+                    # de Doctrine) van bajo `form_options`, no dentro de `options`.
+                    # Si se ponen en `options.class`, el EntityFilter no las
+                    # propaga al form y DoctrineType recibe `class = null`,
+                    # reventando con "getManagerForClass(): Argument #1 must be
+                    # of type string, null given".
+                    form_options:
+                        class: '%sylius.model.channel.class%'
+                type:
+                    type: select
+                    label: 'clearis.grid.invoice.type'
+                    options:
+                        choices:
+                            standard: 'clearis.invoice.type_standard'
+                            rectifying: 'clearis.invoice.type_rectifying'
+            actions:
+                main:
+                    export_book:
+                        type: default
+                        label: 'clearis.grid.invoice.export_book'
+                        options:
+                            link:
+                                route: clearis_invoicing_admin_invoice_export_book
+                                parameters: {}
+                item:
+                    show:
+                        type: show
+                        options:
+                            link:
+                                route: clearis_invoicing_admin_invoice_show
+                                parameters:
+                                    id: resource.id
+                    download_pdf:
+                        type: default
+                        label: 'clearis.grid.invoice.download_pdf'
+                        options:
+                            link:
+                                route: clearis_invoicing_admin_invoice_download_pdf
+                                parameters:
+                                    id: resource.id

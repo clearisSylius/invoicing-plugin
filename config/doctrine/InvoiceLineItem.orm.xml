@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="ClearisSylius\InvoicingPlugin\Entity\InvoiceLineItem"
+            table="clearis_invoicing_invoice_line_item">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO" />
+        </id>
+
+        <field name="name" type="string" length="255" column="name" />
+        <field name="variantName" type="string" length="255" column="variant_name" nullable="true" />
+        <field name="variantCode" type="string" length="255" column="variant_code" nullable="true" />
+        <field name="quantity" type="integer" column="quantity" />
+        <field name="unitPrice" type="integer" column="unit_price" />
+        <field name="discountedUnitNetPrice" type="integer" column="discounted_unit_net_price" />
+        <field name="subtotal" type="integer" column="subtotal" />
+        <field name="taxRate" type="string" length="32" column="tax_rate" nullable="true" />
+        <field name="taxTotal" type="integer" column="tax_total" />
+        <field name="total" type="integer" column="total" />
+
+        <many-to-one field="invoice" target-entity="ClearisSylius\InvoicingPlugin\Entity\Invoice" inversed-by="lineItems">
+            <join-column name="invoice_id" referenced-column-name="id" nullable="false" on-delete="CASCADE" />
+        </many-to-one>
+
+    </entity>
+
+</doctrine-mapping>

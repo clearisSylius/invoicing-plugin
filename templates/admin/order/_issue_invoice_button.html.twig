@@ -1,0 +1,46 @@
+{#
+    Botón de acción en el header de la página de pedido.
+
+    Reglas:
+      - Si el pedido ya tiene factura → mostrar "Ver factura" linkado al PDF
+        de la primera factura (las rectificativas se gestionan desde la
+        propia ficha de la factura). Una vez emitida no se debe poder
+        re-generar — sería un agujero de cumplimiento fiscal.
+      - Si no tiene factura todavía y el trigger del canal es `manual` →
+        mostrar el botón "Emitir factura" que dispara la generación.
+      - Si no tiene factura pero el trigger es automático (order_completed,
+        payment_completed, shipment_shipped) → no mostrar nada: el sistema
+        la generará en el evento correspondiente.
+
+    Sylius 2 admin renderiza con Tabler/Bootstrap 5, así que usamos clases
+    `btn` (no `ui ... button` de Semantic UI, que es lo que el plugin
+    traía por defecto antes y aparecía sin estilo).
+#}
+{% set order = sylius_template_event_context.order ?? hookable_metadata.context.order ?? order ?? null %}
+{% if order is not null %}
+    {% set invoices = sylius_get_clearis_invoices_for_order(order) %}
+
+    {% if invoices is not empty %}
+        {# Ya emitida: ofrecemos "Ver factura" (PDF en pestaña nueva). #}
+        {% set invoice = invoices|first %}
+        <a href="{{ path('clearis_invoicing_admin_invoice_download_pdf', {id: invoice.id}) }}"
+           target="_blank"
+           rel="noopener"
+           class="btn btn-primary">
+            <i class="ti ti-download me-1"></i>
+            {{ 'clearis.ui.order.view_invoice'|trans }}
+        </a>
+    {% else %}
+        {% set trigger = sylius_get_clearis_channel_trigger(order.channel) %}
+        {% if trigger == 'manual' %}
+            <form action="{{ path('clearis_invoicing_admin_invoice_create_manual', {orderNumber: order.number}) }}"
+                  method="post"
+                  class="d-inline">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-plus me-1"></i>
+                    {{ 'clearis.ui.order.issue_invoice'|trans }}
+                </button>
+            </form>
+        {% endif %}
+    {% endif %}
+{% endif %}

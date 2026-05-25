@@ -1,0 +1,8 @@
+# Plugin configuration entry point.
+#
+# Imports are evaluated lexically; we load the twig_hooks subdir last so
+# explicit `clearis_sylius_invoicing` settings always win over hook defaults.
+
+imports:
+    - { resource: 'resources.yaml' }
+    - { resource: 'twig_hooks/**/*.yaml' }

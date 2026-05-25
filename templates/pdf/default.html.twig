@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+{#
+    Plantilla PDF por defecto. Lee toda la configuración de personalización
+    de `template` (instancia de InvoiceTemplate) y respeta los toggles.
+
+    Variables disponibles en el contexto:
+      - invoice   : InvoiceInterface (con order, billingData, shopBillingData, lineItems, taxItems...)
+      - template  : InvoiceTemplateInterface (todos los show* / textos / branding)
+
+    Diseñada para Dompdf (HTML 4 + CSS sencillo: sin flexbox, sin gap,
+    paddings explícitos). Si tocas estilos, prueba el render — Dompdf falla
+    silenciosamente con CSS3 reciente.
+#}
+<html lang="{{ invoice.localeCode|split('_')[0] }}">
+<head>
+    <meta charset="utf-8" />
+    <title>{{ 'clearis.pdf.invoice'|trans }} {{ invoice.number }}</title>
+    <style>
+        {% block style %}
+        {# Densidades: ajustamos paddings y márgenes según el setting #}
+        {% set density = template.layoutDensity %}
+        {% set page_margin_v = density == 'compact' ? '18mm' : (density == 'spacious' ? '36mm' : '28mm') %}
+        {% set page_margin_h = density == 'compact' ? '14mm' : (density == 'spacious' ? '22mm' : '18mm') %}
+        {% set row_padding = density == 'compact' ? '4px 4px' : (density == 'spacious' ? '8px 6px' : '6px 4px') %}
+        {% set section_gap = density == 'compact' ? '8px' : (density == 'spacious' ? '20px' : '14px') %}
+        {% set accent = template.accentColor|default('#222222') %}
+
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 11px; color: #222; margin: {{ page_margin_v }} {{ page_margin_h }}; }
+        h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: 0.4px; color: {{ accent }}; }
+        h2 { font-size: 12px; margin: 0 0 4px; color: #555; text-transform: uppercase; letter-spacing: 0.6px; }
+        h3 { font-size: 11px; margin: 0 0 4px; color: {{ accent }}; text-transform: uppercase; letter-spacing: 0.5px; }
+        table.totals, table.items, table.taxes { width: 100%; border-collapse: collapse; }
+        table.items th, table.items td { border-bottom: 1px solid #eee; padding: {{ row_padding }}; }
+        table.items th { background: #f5f5f5; color: {{ accent }}; text-align: left; }
+        table.items td.num, table.items th.num { text-align: right; white-space: nowrap; }
+        table.totals td { padding: 3px 4px; }
+        table.totals .label { text-align: right; color: #555; }
+        table.totals .value { text-align: right; width: 90px; }
+        table.totals .grand { font-size: 13px; font-weight: bold; border-top: 2px solid {{ accent }}; padding-top: 6px; color: {{ accent }}; }
+        .meta { width: 100%; margin-bottom: {{ section_gap }}; }
+        .meta td { vertical-align: top; padding: 0; }
+        .meta .left { width: 60%; }
+        .meta .right { width: 40%; text-align: right; }
+        .box { border: 1px solid #ddd; padding: 8px 10px; margin-bottom: {{ section_gap }}; }
+        .box.two-col { padding: 0; }
+        .box.two-col td { width: 50%; padding: 8px 10px; vertical-align: top; }
+        .box.two-col td + td { border-left: 1px solid #ddd; }
+        .accent-box { border-left: 3px solid {{ accent }}; padding-left: 10px; margin-bottom: {{ section_gap }}; }
+        .footer { position: fixed; bottom: 8mm; left: 0; right: 0; text-align: center; font-size: 9px; color: #888; }
+        .small { font-size: 9px; color: #888; }
+        .text-pre { white-space: pre-line; }
+        .header-text { margin-bottom: 8px; color: #555; font-style: italic; }
+        {% endblock %}
+    </style>
+</head>
+<body>
+
+{% block header %}
+{% if template.headerText %}
+    <div class="header-text">{{ template.headerText|nl2br }}</div>
+{% endif %}
+
+<table class="meta">
+    <tr>
+        <td class="left">
+            {% if template.showLogo and template.logoPath %}
+                <img src="{{ template.logoPath }}" alt="" style="max-height: 50px; max-width: 220px; margin-bottom: 6px;" />
+            {% endif %}
+            <h2>{{ invoice.shopBillingData.companyName }}</h2>
+            <div>
+                {{ invoice.shopBillingData.taxId }}<br />
+                {{ invoice.shopBillingData.street }}<br />
+                {{ invoice.shopBillingData.postcode }} {{ invoice.shopBillingData.city }} ({{ invoice.shopBillingData.countryCode }})
+            </div>
+            {% if template.headerContactInfo %}
+                <div class="small text-pre" style="margin-top: 4px;">{{ template.headerContactInfo }}</div>
+            {% endif %}
+        </td>
+        <td class="right">
+            <h1>{{ 'clearis.pdf.invoice'|trans }}</h1>
+            <div>
+                <strong>{{ invoice.number }}</strong><br />
+                {{ invoice.issuedAt|date('d/m/Y') }}
+                {% if template.showOrderNumber and invoice.order %}
+                    <br /><span class="small">{{ 'clearis.pdf.order_number'|trans }}: {{ invoice.order.number }}</span>
+                {% endif %}
+            </div>
+        </td>
+    </tr>
+</table>
+{% endblock %}
+
+{% block customer_info %}
+{% set order = invoice.order %}
+{% set shipping = template.showCustomerShippingAddress and order ? order.shippingAddress : null %}
+{% if shipping %}
+    <table class="box two-col"><tr>
+        <td>
+            <h3>{{ 'clearis.pdf.bill_to'|trans }}</h3>
+            <strong>{{ invoice.billingData.fullName }}</strong><br />
+            {% if invoice.billingData.taxId %}{{ 'clearis.pdf.tax_id'|trans }}: {{ invoice.billingData.taxId }}<br />{% endif %}
+            {{ invoice.billingData.street }}<br />
+            {{ invoice.billingData.postcode }} {{ invoice.billingData.city }}
+            {%- if invoice.billingData.provinceName %}, {{ invoice.billingData.provinceName }}{% endif %}<br />
+            {{ invoice.billingData.countryCode }}
+            {% if template.showCustomerEmail and order and order.customer and order.customer.email %}
+                <br /><span class="small">{{ order.customer.email }}</span>
+            {% endif %}
+        </td>
+        <td>
+            <h3>{{ 'clearis.pdf.ship_to'|trans }}</h3>
+            {{ shipping.firstName }} {{ shipping.lastName }}<br />
+            {{ shipping.street }}<br />
+            {{ shipping.postcode }} {{ shipping.city }}
+            {%- if shipping.provinceName %}, {{ shipping.provinceName }}{% endif %}<br />
+            {{ shipping.countryCode }}
+        </td>
+    </tr></table>
+{% else %}
+    <div class="box">
+        <h3>{{ 'clearis.pdf.bill_to'|trans }}</h3>
+        <strong>{{ invoice.billingData.fullName }}</strong><br />
+        {% if invoice.billingData.taxId %}{{ 'clearis.pdf.tax_id'|trans }}: {{ invoice.billingData.taxId }}<br />{% endif %}
+        {{ invoice.billingData.street }}<br />
+        {{ invoice.billingData.postcode }} {{ invoice.billingData.city }}
+        {%- if invoice.billingData.provinceName %}, {{ invoice.billingData.provinceName }}{% endif %}<br />
+        {{ invoice.billingData.countryCode }}
+        {% if template.showCustomerEmail and order and order.customer and order.customer.email %}
+            <br /><span class="small">{{ order.customer.email }}</span>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block items %}
+<table class="items">
+    <thead>
+        <tr>
+            {% if template.showLineSku %}
+                <th style="width: 80px;">{{ 'clearis.pdf.column.sku'|trans }}</th>
+            {% endif %}
+            <th>{{ 'clearis.pdf.column.item'|trans }}</th>
+            <th class="num">{{ 'clearis.pdf.column.quantity'|trans }}</th>
+            <th class="num">{{ 'clearis.pdf.column.unit_price'|trans }}</th>
+            {% if template.showLineDiscounts %}
+                <th class="num">{{ 'clearis.pdf.column.discount'|trans }}</th>
+            {% endif %}
+            <th class="num">{{ 'clearis.pdf.column.tax_rate'|trans }}</th>
+            <th class="num">{{ 'clearis.pdf.column.total'|trans }}</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for line in invoice.lineItems %}
+        {% set unit_full = line.unitPrice %}
+        {% set unit_net  = line.discountedUnitNetPrice %}
+        {% set discount_per_unit = unit_full - unit_net %}
+        <tr>
+            {% if template.showLineSku %}
+                <td><span class="small">{{ line.variantCode|default('—') }}</span></td>
+            {% endif %}
+            <td>
+                {{ line.name }}
+                {% if template.showLineExtendedDescription and line.variantName %}
+                    <br /><span class="small">{{ line.variantName }}</span>
+                {% endif %}
+            </td>
+            <td class="num">{{ line.quantity }}</td>
+            <td class="num">{{ (unit_net / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</td>
+            {% if template.showLineDiscounts %}
+                <td class="num">
+                    {% if discount_per_unit > 0 %}
+                        −{{ ((discount_per_unit * line.quantity) / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            {% endif %}
+            <td class="num">{% if line.taxRate %}{{ line.taxRate|trim('%') }}%{% else %}—{% endif %}</td>
+            <td class="num">{{ (line.total / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block totals %}
+<table class="totals" style="margin-top: 14px;">
+    <tr>
+        <td></td>
+        <td class="label">{{ 'clearis.pdf.subtotal'|trans }}</td>
+        <td class="value">{{ (invoice.subtotal / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</td>
+    </tr>
+    {% if template.showTaxBreakdown %}
+        {% for tax in invoice.taxItems %}
+        <tr>
+            <td></td>
+            <td class="label">{{ tax.label }} ({{ ((tax.base) / 100)|number_format(2, ',', '.') }})</td>
+            <td class="value">{{ (tax.amount / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</td>
+        </tr>
+        {% endfor %}
+    {% else %}
+        <tr>
+            <td></td>
+            <td class="label">{{ 'clearis.pdf.taxes_total'|trans }}</td>
+            <td class="value">{{ (invoice.taxesTotal / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</td>
+        </tr>
+    {% endif %}
+    <tr>
+        <td></td>
+        <td class="label grand">{{ 'clearis.pdf.total'|trans }}</td>
+        <td class="value grand">{{ (invoice.total / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</td>
+    </tr>
+</table>
+{% endblock %}
+
+{% block order_meta %}
+{% set order = invoice.order %}
+{% if order and (template.showPaymentMethod or template.showShippingMethod) %}
+    <div class="accent-box" style="margin-top: 14px;">
+        {% if template.showPaymentMethod %}
+            {% set last_payment = order.payments|last %}
+            {% if last_payment and last_payment.method %}
+                <div>
+                    <strong>{{ 'clearis.pdf.payment_method'|trans }}:</strong>
+                    {{ last_payment.method.name|default(last_payment.method.code) }}
+                </div>
+            {% endif %}
+        {% endif %}
+        {% if template.showShippingMethod %}
+            {% set last_shipment = order.shipments|last %}
+            {% if last_shipment and last_shipment.method %}
+                <div>
+                    <strong>{{ 'clearis.pdf.shipping_method'|trans }}:</strong>
+                    {{ last_shipment.method.name|default(last_shipment.method.code) }}
+                    {% if last_shipment.tracking %}
+                        — {{ 'clearis.pdf.tracking'|trans }}: <code>{{ last_shipment.tracking }}</code>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block payment_terms %}
+{% if template.paymentTermsText %}
+    <div class="accent-box" style="margin-top: 12px;">
+        <h3>{{ 'clearis.pdf.payment_terms'|trans }}</h3>
+        <div class="text-pre">{{ template.paymentTermsText }}</div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block legal_notes %}
+{% if template.legalNotesText %}
+    <div class="small text-pre" style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #eee;">
+        {{ template.legalNotesText }}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+<div class="footer">
+    {{ template.footerText|default('') }}
+</div>
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+clearis:
+    cancel: 'Cancel'
+    form:
+        address:
+            tax_id: 'Tax ID (NIF/CIF)'
+        rectify:
+            reason: 'Reason (RD 1619/2012)'
+            scope: 'Rectification scope'
+            scope_total: 'Total (supersedes the original)'
+            scope_partial: 'Partial (amounts below)'
+            base_delta: 'Base delta (cents)'
+            base_delta_help: 'In cents. Negative for refunds.'
+            taxes_delta: 'Tax delta (cents)'
+            taxes_delta_help: 'In cents. Negative for refunds.'
+    invoice:
+        type_standard: 'Standard'
+        type_rectifying: 'Rectifying'
+        state:
+            issued: 'Issued'
+            cancelled: 'Cancelled'
+        trigger:
+            on_payment_completed: 'On payment completed'
+            on_order_shipped: 'On order shipped'
+            on_order_completed: 'On order completed'
+            manual: 'Manual'
+        flash:
+            issued: 'Invoice issued.'
+            rectified: 'Rectifying invoice issued.'
+    tax_id:
+        invalid: 'Invalid Spanish tax ID (control digit mismatch).'
+        invalid_format: 'Invalid Spanish tax ID format.'
+        too_long: 'Tax ID must not be longer than {{ limit }} characters.'
+    ui:
+        order:
+            view_invoice: 'View invoice'
+        menu:
+            invoicing: 'Invoicing'
+            invoices: 'Invoices'
+            series: 'Series'
+            templates: 'PDF templates'
+            export_book: 'Invoice book'
+            channels_config: 'Per-channel config'

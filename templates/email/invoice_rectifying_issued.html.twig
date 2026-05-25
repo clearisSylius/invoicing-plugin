@@ -1,0 +1,12 @@
+<p>{{ 'clearis.email.invoice_rectifying.greeting'|trans({'%name%': invoice.billingData.firstName ?: invoice.billingData.fullName }) }}</p>
+
+<p>{{ 'clearis.email.invoice_rectifying.intro'|trans({'%number%': invoice.number, '%original%': original.number}) }}</p>
+
+<p>
+    {{ 'clearis.email.invoice_rectifying.reason'|trans }}: <strong>{{ invoice.rectificationReason }}</strong><br />
+    {{ 'clearis.email.invoice_rectifying.total'|trans }}: <strong>{{ (invoice.total / 100)|number_format(2, ',', '.') }} {{ invoice.currencyCode }}</strong>
+</p>
+
+<p>{{ 'clearis.email.invoice_rectifying.attachment'|trans }}</p>
+
+<p>{{ 'clearis.email.invoice_rectifying.thanks'|trans }}</p>

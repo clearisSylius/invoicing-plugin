@@ -1,0 +1,5 @@
+{% if data.active %}
+    <span class="badge bg-green text-white">{{ 'clearis.ui.series.active'|trans }}</span>
+{% else %}
+    <span class="badge bg-secondary text-white">{{ 'clearis.ui.series.inactive'|trans }}</span>
+{% endif %}

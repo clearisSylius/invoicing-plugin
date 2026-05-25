@@ -1,0 +1,27 @@
+{% extends '@ClearisSyliusInvoicingPlugin/admin/_layout/page.html.twig' %}
+
+{# Sylius 2 admin renderiza con Bootstrap 5. Sin este `form_theme` los
+   widgets caen al tema por defecto de Symfony (`form_div_layout`) y los
+   inputs salen con estilo de navegador, no con las clases form-control. #}
+{% form_theme form 'bootstrap_5_layout.html.twig' %}
+
+{% set title = 'clearis.ui.invoice.export_book_title'|trans %}
+
+{% block page_title %}
+    <i class="ti ti-archive me-1"></i>
+    {{ 'clearis.ui.invoice.export_book_title'|trans }}
+{% endblock %}
+
+{% block page_body %}
+    <p class="text-muted">{{ 'clearis.ui.invoice.export_book_help'|trans }}</p>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <input type="hidden" name="submit" value="1" />
+        <div class="mt-3">
+            <button type="submit" class="btn btn-success">
+                <i class="ti ti-download me-1"></i> {{ 'clearis.ui.invoice.export_book_submit'|trans }}
+            </button>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}

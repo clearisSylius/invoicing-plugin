@@ -1,0 +1,73 @@
+# Sylius resource registry for the plugin entities.
+#
+# OJO: ESTE FICHERO NO SE CARGA — está aquí solo como referencia y backup.
+# El registro real lo hace `ClearisSyliusInvoicingExtension::load()` vía
+# `registerResources()` con los nodos definidos en `Configuration.php`.
+# Si necesitas cambiar la config de un recurso (form, controller, etc.)
+# edita `src/DependencyInjection/Configuration.php`, no este YAML.
+
+sylius_resource:
+    drivers: ['doctrine/orm']
+
+    resources:
+        clearis_invoicing.invoice:
+            classes:
+                model: ClearisSylius\InvoicingPlugin\Entity\Invoice
+                interface: ClearisSylius\InvoicingPlugin\Model\InvoiceInterface
+                repository: ClearisSylius\InvoicingPlugin\Doctrine\ORM\InvoiceRepository
+                controller: Sylius\Bundle\ResourceBundle\Controller\ResourceController
+                factory: Sylius\Component\Resource\Factory\Factory
+
+        clearis_invoicing.invoice_line_item:
+            classes:
+                model: ClearisSylius\InvoicingPlugin\Entity\InvoiceLineItem
+                interface: ClearisSylius\InvoicingPlugin\Model\InvoiceLineItemInterface
+                controller: Sylius\Bundle\ResourceBundle\Controller\ResourceController
+                factory: Sylius\Component\Resource\Factory\Factory
+
+        clearis_invoicing.invoice_tax_item:
+            classes:
+                model: ClearisSylius\InvoicingPlugin\Entity\InvoiceTaxItem
+                interface: ClearisSylius\InvoicingPlugin\Model\InvoiceTaxItemInterface
+                controller: Sylius\Bundle\ResourceBundle\Controller\ResourceController
+                factory: Sylius\Component\Resource\Factory\Factory
+
+        clearis_invoicing.billing_data:
+            classes:
+                model: ClearisSylius\InvoicingPlugin\Entity\BillingData
+                interface: ClearisSylius\InvoicingPlugin\Model\BillingDataInterface
+                controller: Sylius\Bundle\ResourceBundle\Controller\ResourceController
+                factory: Sylius\Component\Resource\Factory\Factory
+
+        clearis_invoicing.shop_billing_data:
+            classes:
+                model: ClearisSylius\InvoicingPlugin\Entity\ShopBillingData
+                interface: ClearisSylius\InvoicingPlugin\Model\ShopBillingDataInterface
+                controller: Sylius\Bundle\ResourceBundle\Controller\ResourceController
+                factory: Sylius\Component\Resource\Factory\Factory
+
+        clearis_invoicing.invoice_series:
+            classes:
+                model: ClearisSylius\InvoicingPlugin\Entity\InvoiceSeries
+                interface: ClearisSylius\InvoicingPlugin\Model\InvoiceSeriesInterface
+                repository: ClearisSylius\InvoicingPlugin\Doctrine\ORM\InvoiceSeriesRepository
+                controller: Sylius\Bundle\ResourceBundle\Controller\ResourceController
+                factory: Sylius\Component\Resource\Factory\Factory
+                form: ClearisSylius\InvoicingPlugin\Form\Type\InvoiceSeriesType
+
+        clearis_invoicing.invoice_template:
+            classes:
+                model: ClearisSylius\InvoicingPlugin\Entity\InvoiceTemplate
+                interface: ClearisSylius\InvoicingPlugin\Model\InvoiceTemplateInterface
+                repository: ClearisSylius\InvoicingPlugin\Doctrine\ORM\InvoiceTemplateRepository
+                controller: Sylius\Bundle\ResourceBundle\Controller\ResourceController
+                factory: Sylius\Component\Resource\Factory\Factory
+                form: ClearisSylius\InvoicingPlugin\Form\Type\InvoiceTemplateType
+
+        clearis_invoicing.channel_invoicing_settings:
+            classes:
+                model: ClearisSylius\InvoicingPlugin\Entity\ChannelInvoicingSettings
+                interface: ClearisSylius\InvoicingPlugin\Model\ChannelInvoicingSettingsInterface
+                repository: ClearisSylius\InvoicingPlugin\Doctrine\ORM\ChannelInvoicingSettingsRepository
+                controller: Sylius\Bundle\ResourceBundle\Controller\ResourceController
+                factory: Sylius\Component\Resource\Factory\Factory

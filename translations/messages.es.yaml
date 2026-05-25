@@ -1,0 +1,294 @@
+# Sylius admin compone breadcrumbs y títulos de páginas CRUD a partir del
+# alias del recurso, con el patrón `<applicationName>.ui.<singularName|pluralName>`.
+# Para nuestro alias `clearis_invoicing.invoice` busca `clearis_invoicing.ui.invoice`
+# y `clearis_invoicing.ui.invoices`. Sin estas claves muestra la propia
+# cadena literal (ej. "Mostrar clearis_invoicing.ui.invoice"), por eso
+# vivimos ESTA rama del árbol de traducciones aquí arriba aunque el resto
+# del bundle use el prefijo `clearis:`.
+clearis_invoicing:
+    # Sylius admin compone breadcrumbs y títulos de páginas CRUD a partir
+    # del alias del recurso: `<applicationName>.ui.<singularName|pluralName>`.
+    # Para alias del estilo `clearis_invoicing.invoice_series` el singular es
+    # `invoice_series` (con guion bajo). Hay que listarlos todos para que el
+    # breadcrumb no muestre el literal.
+    ui:
+        invoice: 'Factura'
+        invoices: 'Facturas'
+        # Doctrine Inflector pluraliza "series" como "series" (palabra
+        # incontable en inglés), así que singular y plural usan la misma
+        # cadena en español también ("Serie" — abreviado por consistencia
+        # con la UI: en breadcrumbs Sylius añade los artículos).
+        invoice_series: 'Series de facturación'
+        invoice_template: 'Plantilla de factura'
+        invoice_templates: 'Plantillas de factura'
+
+clearis:
+    cancel: 'Cancelar'
+    form:
+        address:
+            tax_id: 'NIF/CIF'
+        rectify:
+            reason: 'Motivo (RD 1619/2012)'
+            scope: 'Alcance de la rectificación'
+            scope_total: 'Total (anula la original)'
+            scope_partial: 'Parcial (importes a continuación)'
+            base_delta: 'Base a rectificar (céntimos)'
+            base_delta_help: 'Importe en céntimos. Negativo para abono/devolución.'
+            taxes_delta: 'Cuota IVA a rectificar (céntimos)'
+            taxes_delta_help: 'Importe en céntimos. Negativo para abono/devolución.'
+        series:
+            code: 'Código'
+            name: 'Nombre'
+            channel: 'Canal'
+            type: 'Tipo'
+            type_standard: 'Estándar'
+            type_rectifying: 'Rectificativa'
+            format: 'Formato'
+            format_help: 'Placeholders: {year}, {number}, {prefix}. Ej. "{year}/{number}".'
+            padding: 'Padding'
+            current_number: 'Contador actual'
+            current_number_help: 'Si importas desde el plugin oficial, se ajusta automáticamente al MAX importado.'
+            yearly_reset: 'Reset anual'
+            active: 'Activa'
+        template:
+            # --- Identidad ---
+            code: 'Código'
+            name: 'Nombre'
+            channel: 'Canal'
+            channel_help: 'Si lo dejas vacío, esta plantilla se usa como fallback global (todos los canales).'
+            type: 'Tipo de factura'
+            type_standard: 'Estándar'
+            type_rectifying: 'Rectificativa'
+
+            # --- Branding ---
+            show_logo: 'Mostrar logo en la cabecera'
+            logo_path: 'Ruta del logo'
+            logo_path_help: 'Ruta absoluta en el servidor o relativa al proyecto (p.ej. /var/www/.../public/uploads/logos/empresa.png).'
+            accent_color: 'Color principal'
+            accent_color_help: 'Color usado en títulos, totales y bordes. Por defecto gris oscuro.'
+            layout_density: 'Densidad del diseño'
+            density_compact: 'Compacta — menos espacio en blanco'
+            density_regular: 'Normal — equilibrada'
+            density_spacious: 'Amplia — más respiración'
+
+            # --- Cabecera ---
+            header_text: 'Texto de cabecera'
+            header_text_help: 'Aparece sobre los datos del emisor. Útil para slogan, marca, "Factura simplificada", etc.'
+            header_contact_info: 'Información de contacto del emisor'
+            header_contact_info_help: 'Texto libre bajo la dirección fiscal: teléfono, email, web, redes... Una línea por dato.'
+
+            # --- Cliente ---
+            show_customer_email: 'Mostrar email del cliente'
+            show_customer_shipping_address: 'Mostrar dirección de envío'
+
+            # --- Líneas ---
+            show_line_sku: 'Mostrar SKU/código de producto'
+            show_line_extended_description: 'Mostrar descripción extendida (variante)'
+            show_line_discounts: 'Mostrar columna de descuentos'
+
+            # --- Totales ---
+            show_tax_breakdown: 'Mostrar desglose por tipo de IVA'
+
+            # --- Referencias del pedido ---
+            show_order_number: 'Mostrar número de pedido'
+            show_payment_method: 'Mostrar método de pago'
+            show_shipping_method: 'Mostrar método de envío y tracking'
+
+            # --- Bloques de texto libres ---
+            payment_terms_text: 'Condiciones de pago'
+            payment_terms_text_help: 'Vencimiento, intereses de demora, descuentos por pronto pago, etc. Se pinta resaltado.'
+            legal_notes_text: 'Notas legales'
+            legal_notes_text_help: 'Información LOPD/RGPD, garantías, leyendas obligatorias por sector. Se pinta al pie del cuerpo en letra pequeña.'
+            footer_text: 'Pie de página'
+            footer_text_help: 'Texto centrado al final de cada página (todas, no solo la última).'
+
+            # --- Avanzado ---
+            twig_template: 'Plantilla Twig (avanzado)'
+            twig_template_help: 'Ruta de la plantilla Twig que renderiza el PDF. Solo modificar si un desarrollador te ha dado una específica. Por defecto: @ClearisSyliusInvoicingPlugin/pdf/default.html.twig'
+        channel_settings:
+            trigger: 'Trigger de emisión'
+            send_email_on_issue: 'Enviar email al cliente al emitir'
+            standard_series: 'Serie estándar'
+            rectifying_series: 'Serie rectificativa'
+            rectifying_series_help: 'Opcional. Si lo dejas vacío, la primera vez que emitas una rectificativa se crea automáticamente una serie con prefijo "R-".'
+            standard_template: 'Plantilla estándar'
+            rectifying_template: 'Plantilla rectificativa'
+            shop_billing_data: 'Datos fiscales del emisor'
+            sender_email: 'Dirección "De:" del email'
+            sender_email_help: 'Dirección desde la que se envía la factura por email al cliente. Si lo dejas vacío, se usa la dirección global del plugin.'
+            sender_name: 'Nombre "De:" del email'
+            sender_name_help: 'Nombre humano que acompaña al email. Por defecto "Facturación".'
+        shop_billing:
+            company_name: 'Razón social'
+            tax_id: 'NIF/CIF'
+            tax_id_help: 'NIF, CIF o NIE de la empresa emisora. Aparecerá en cada factura.'
+            street: 'Dirección'
+            city: 'Ciudad'
+            postcode: 'Código postal'
+            country_code: 'País'
+        book_export:
+            from: 'Desde'
+            to: 'Hasta'
+            channel: 'Canal'
+    invoice:
+        type_standard: 'Estándar'
+        type_rectifying: 'Rectificativa'
+        state:
+            issued: 'Emitida'
+            cancelled: 'Cancelada'
+        trigger:
+            on_payment_completed: 'Al completar el pago'
+            on_order_shipped: 'Al enviar el pedido'
+            on_order_completed: 'Al completar el pedido'
+            manual: 'Manual'
+        rectification_reason:
+            r1: 'R1 — Rectificación de error fundado en derecho'
+            r2: 'R2 — Concurso de acreedores'
+            r3: 'R3 — Créditos incobrables'
+            r4: 'R4 — Otras modificaciones de la base imponible'
+            r5: 'R5 — Rectificativa simplificada (B2C)'
+        flash:
+            issued: 'Factura emitida correctamente.'
+            rectified: 'Factura rectificativa emitida correctamente.'
+    grid:
+        invoice:
+            number: 'Número'
+            type: 'Tipo'
+            issued_at: 'Fecha'
+            channel: 'Canal'
+            customer: 'Cliente'
+            total: 'Total'
+            state: 'Estado'
+            export_book: 'Exportar libro registro'
+            download_pdf: 'Descargar PDF'
+        series:
+            code: 'Código'
+            name: 'Nombre'
+            type: 'Tipo'
+            channel: 'Canal'
+            current_number: 'Contador'
+            active: 'Activa'
+        template:
+            code: 'Código'
+            name: 'Nombre'
+            type: 'Tipo'
+            channel: 'Canal'
+            twig_template: 'Plantilla'
+    ui:
+        cancel: 'Cancelar'
+        back_to_invoices: 'Volver a facturas'
+        invoice:
+            show:
+                title: 'Factura'
+                download_pdf: 'Descargar PDF'
+                rectify: 'Emitir rectificativa'
+                customer: 'Datos del cliente'
+                tax_id: 'NIF/CIF'
+                rectification: 'Rectificación'
+                rectification_reason: 'Motivo'
+                rectifies: 'Rectifica a'
+                item: 'Concepto'
+                quantity: 'Cant.'
+                unit_price: 'Precio unitario'
+                tax_rate: 'Tipo IVA'
+                total: 'Total'
+                subtotal: 'Subtotal'
+            export_book: 'Exportar libro registro'
+            export_book_title: 'Exportar libro registro de facturas emitidas'
+            export_book_help: 'Selecciona el rango de fechas y, opcionalmente, un canal. Se descargará un archivo .xlsx con todas las facturas (estándar y rectificativas) del periodo.'
+            export_book_submit: 'Descargar Excel'
+        rectify:
+            title: 'Emitir factura rectificativa'
+            warning: 'Una rectificativa total anula la factura original. La numeración se asigna automáticamente desde la serie rectificativa configurada en el canal.'
+            submit: 'Emitir'
+        series:
+            subheader: 'Configuración de series de numeración por canal y tipo.'
+            active: 'Activa'
+            inactive: 'Inactiva'
+        template:
+            subheader: 'Plantillas PDF asociadas a canales.'
+        order:
+            invoices: 'Facturas'
+            no_invoices: 'Este pedido aún no tiene factura emitida.'
+            issue_invoice: 'Emitir factura'
+            view_invoice: 'Ver factura'
+            invoice_number: 'Número'
+            invoice_type: 'Tipo'
+            invoice_issued_at: 'Fecha'
+            invoice_total: 'Total'
+        menu:
+            invoicing: 'Facturación'
+            invoices: 'Facturas'
+            series: 'Series'
+            templates: 'Plantillas PDF'
+            export_book: 'Libro registro'
+            channels_config: 'Configuración por canal'
+        channel:
+            list_title: 'Configuración de facturación por canal'
+            list_help: 'Cada canal del shop debe tener su propia configuración de facturación (serie, plantilla, datos fiscales del emisor) antes de poder emitir facturas en ese canal.'
+            list_no_channels: 'No hay canales creados en este shop. Crea al menos uno desde Configuración → Canales.'
+            list_col_channel: 'Canal'
+            list_col_status: 'Estado'
+            list_col_series: 'Serie estándar'
+            list_col_template: 'Plantilla'
+            status_configured: 'Configurado'
+            status_partial: 'Incompleto'
+            status_unconfigured: 'Sin configurar'
+            default_template: '(plantilla por defecto)'
+            invoicing_settings: 'Configuración de facturación'
+            trigger: 'Trigger'
+            standard_series: 'Serie estándar'
+            rectifying_series: 'Serie rectificativa'
+            standard_template: 'Plantilla estándar'
+            shop_billing: 'Datos del emisor'
+            no_settings: 'Este canal no tiene configuración de facturación. Créala antes de emitir facturas.'
+            no_settings_yet: 'Este canal aún no tiene configuración de facturación. Al guardar se creará por primera vez.'
+            configure_invoicing_title: 'Configuración de facturación'
+            configure_help: 'Selecciona la serie de numeración por defecto (estándar y rectificativa), las plantillas PDF y los datos del emisor para este canal. Estos valores se aplican a todas las facturas emitidas vía los listeners automáticos del plugin.'
+            create_invoicing_settings: 'Crear configuración'
+            edit_invoicing_settings: 'Editar configuración'
+        save: 'Guardar'
+    pdf:
+        invoice: 'FACTURA'
+        rectifying_invoice: 'FACTURA RECTIFICATIVA'
+        rectifies: 'rectifica a'
+        rectification_reason: 'Motivo'
+        bill_to: 'Cliente'
+        ship_to: 'Enviar a'
+        tax_id: 'NIF/CIF'
+        subtotal: 'Subtotal'
+        taxes_total: 'Total IVA'
+        total: 'Total'
+        order_number: 'Pedido nº'
+        payment_method: 'Método de pago'
+        shipping_method: 'Método de envío'
+        tracking: 'Tracking'
+        payment_terms: 'Condiciones de pago'
+        column:
+            sku: 'SKU'
+            item: 'Concepto'
+            quantity: 'Cant.'
+            unit_price: 'Precio'
+            discount: 'Descuento'
+            tax_rate: 'IVA'
+            total: 'Total'
+    email:
+        invoice_issued:
+            subject: 'Factura {number}'
+            greeting: 'Hola %name%,'
+            intro: 'Adjuntamos tu factura %number% con fecha %date%.'
+            total: 'Total'
+            attachment: 'Encontrarás la factura en formato PDF como adjunto a este email.'
+            thanks: 'Gracias por tu compra.'
+        invoice_rectifying:
+            subject: 'Factura rectificativa {number}'
+            greeting: 'Hola %name%,'
+            intro: 'Hemos emitido la factura rectificativa %number% que modifica la factura %original%.'
+            reason: 'Motivo'
+            total: 'Total'
+            attachment: 'Encontrarás la factura rectificativa en formato PDF como adjunto.'
+            thanks: 'Gracias.'
+    tax_id:
+        invalid: 'El NIF/CIF/NIE no es válido (dígito de control incorrecto).'
+        invalid_format: 'El formato del NIF/CIF/NIE no es correcto.'
+        too_long: 'El NIF/CIF no puede tener más de {{ limit }} caracteres.'

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults autowire="true" autoconfigure="true" public="false" />
+
+        <!--
+            InvoiceMailer ahora recibe sender por llamada (resuelto en el
+            listener desde la configuración per-canal con fallback al
+            parameter global). Los argumentos `sender_address` y
+            `sender_name` aquí son el fallback global: si quedan null,
+            los emails no se envían (sin romper la emisión de la factura).
+        -->
+        <service id="ClearisSylius\InvoicingPlugin\Mailer\InvoiceMailer">
+            <argument type="service" id="mailer" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="ClearisSylius\InvoicingPlugin\Storage\PdfStorageInterface" />
+        </service>
+
+        <service id="ClearisSylius\InvoicingPlugin\Mailer\InvoiceMailerInterface"
+                 alias="ClearisSylius\InvoicingPlugin\Mailer\InvoiceMailer" />
+
+        <service id="ClearisSylius\InvoicingPlugin\EventListener\SendInvoiceEmailListener">
+            <argument type="service" id="ClearisSylius\InvoicingPlugin\Mailer\InvoiceMailerInterface" />
+            <argument type="service" id="ClearisSylius\InvoicingPlugin\Doctrine\ORM\ChannelInvoicingSettingsRepository" />
+            <argument>%clearis_sylius_invoicing.email.sender_address%</argument>
+            <argument>%clearis_sylius_invoicing.email.sender_name%</argument>
+        </service>
+    </services>
+
+</container>
