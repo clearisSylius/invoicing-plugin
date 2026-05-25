@@ -1,0 +1,23 @@
+# Mantenimiento automatizado de dependencias. Útil para que el equipo de
+# Sylius vea que el plugin está vivo (las revisiones del marketplace
+# valoran que el repo tenga actividad reciente).
+version: 2
+updates:
+    -   package-ecosystem: "composer"
+        directory: "/"
+        schedule:
+            interval: "weekly"
+            day: "monday"
+        open-pull-requests-limit: 5
+        labels:
+            - "dependencies"
+            - "composer"
+
+    -   package-ecosystem: "github-actions"
+        directory: "/"
+        schedule:
+            interval: "monthly"
+        open-pull-requests-limit: 3
+        labels:
+            - "dependencies"
+            - "github-actions"
